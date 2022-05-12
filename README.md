@@ -1,5 +1,5 @@
 # Predator-Prey Swarm Simulator and Animator
-![alt text](https://github.com/DanielMortenson/PredatoryBoids/blob/ac8a066148b71792811d27a77cea986e943f7137/hunt.gif?raw=true)
+![alt text](https://github.com/DanielMortenson/PredatoryBoids/blob/e294c3088206077f0b131e7c302dd62758c8104a/hunt2.gif?raw=true)
 
 ## Abstract
 
