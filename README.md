@@ -9,6 +9,8 @@ Boid's Algorithm (Reynolds 1987) is the classical method for modeling the moveme
 
 Everything you need to make an animation of predator-prey system is included here. Use the RunSimulation.ipynb Jupyter Notebook to make a simulation in minutes. Requires Python3, Scikit-Learn, Juptyer Notebook, Numpy, Matplotlib, tqdm, and ffmpeg to run.
 
+Code for the extended Boid's algorithm and animation function are located in functions.py
+
 ## Introduction
 
 Boid's Algorithm models the behavior of animal swarms remarkably well, in that the pulses, ripples, and seemingly coordinated movement seen in real-life bird or fish swarms are visually similar to movement seen in a boid's simulation. The algorithm works under the assumption that each boid (bird-oid animal) makes a decision at each time step $t$ on where to steer based only on information that is visible to the bird (within some sight radius $r_s$). That decision is based on three goals:
