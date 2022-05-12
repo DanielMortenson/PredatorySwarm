@@ -250,7 +250,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
         animation.writer = animation.writers['ffmpeg']
         plt.ioff()  #turn off interaction to save file
 
-        ani = animation.FuncAnimation(fig, update, frames = range(time_steps),interval = 30) #run the animation
+        ani = animation.FuncAnimation(fig, update, frames = range(time_steps),interval = 45) #run the animation
 
         ani.save(f'{n_preds}hunters_{n_boids_orig}boids_flock{pred_swarm}time_s{time_steps}{anim_type}')
     return dead_count
