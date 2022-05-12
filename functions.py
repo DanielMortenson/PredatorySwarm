@@ -9,9 +9,8 @@ import matplotlib.animation as animation
 
 class boid():
     '''
-    Class for each individual agent (bird, fish, etc) in the swarm. 
+    Class for each individual agent (bird, fish, shark, etc) in the swarm. 
     '''
-        
     def __init__(self,x,y,max_force = .8,max_speed = 2.5,v_init = None):
         """_summary_
 
@@ -54,8 +53,15 @@ class boid():
         return np.array([self.x,self.y,self.v[0],self.v[1]])
 
 def hunt(n_boids = 1000, n_preds = 5,time_steps = 150, 
-         pred_swarm = True,circle_start = True,anim= True):
-    """_summary_
+         pred_swarm = True,circle_start = True,anim= True,
+        sight_boids = 20, sight_pred = 50,
+        x_lim = [-200,200],y_lim = [-150,150],
+        b_motivation = [2.5, 3, 2, 1], p_motivation = [2, 3, 1,1],
+        anim_type = ".gif"):
+    """
+    Simulates a swarm of predators hunting and capturing a swarm of prey
+    or just a swarm of prey (if pred_swarm is not True) over a set spatial
+    and temporal domain.
 
     Args:
         n_boids (int, optional): Number of boids in swarm. Defaults to 1000.
@@ -64,7 +70,13 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
         pred_swarm (bool, optional): If true, predators will be in system, otherwise, no predators. Defaults to True.
         circle_start (bool, optional): Start the predators in a circle? Defaults to True.
         anim (bool, optional): Output animation? Defaults to True.
-
+        sight_boids (float, optional): Length of sight for boids. Defaults to 20
+        sight_pred: (float,optional): Length of sight for predators. Defaults to 50
+        x_lim (tuple (int, int)): Spatial width (x) of domain
+        y_lim (tuple (int, int)): Spatial height (y) of domain
+        b_motivation(tuple (float,float,float,float)): motivations of boids (separation, fleeing, conformity, cohesion)
+        p_motivation(tuple (float, float, float, float)): motivations of predators (separation, hunding, conformity, cohesion)
+        anim_type (string): set to ".gif" to output a GIF, ".mp4" to output an MP4 file.
     Returns:
         dead_count (int): Number of boids captured by predators during simulation
     """    
@@ -72,24 +84,20 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
     n_boids_orig = n_boids #save the original number of boids
     boids = []
     preds = []
-    sight_boids = 20
-    sight_pred = 50
     x_hist = np.ones((time_steps,n_boids))*500
     y_hist = np.ones((time_steps,n_boids))*500
     x_hist_2 = np.zeros((time_steps,n_preds))
     y_hist_2 = np.zeros((time_steps,n_preds))
     dead_count = [0]
-    x_lim = [-500,500]
-    y_lim = [-300,300]
     for i in range(n_boids):
         new_loc = np.random.uniform(-200,200,(2,))
-        new_boid = boid(new_loc[0],new_loc[1],x_lim,y_lim,max_force = .7,max_speed = 3)
+        new_boid = boid(new_loc[0],new_loc[1],max_force = .7,max_speed = 3)
         boids.append(new_boid)
 
     for i in range(n_preds):
         if circle_start:
             theta = 2*np.pi * i/(n_preds)
-            new_loc = [10*np.cos(theta),10*np.sin(theta)]
+            new_loc = [30*np.cos(theta),30*np.sin(theta)]
         else:
             new_loc = np.random.uniform(-100,100,(2,))
         #v_0 = [-20*np.sin(theta) , 20*np.cos(theta)]
@@ -153,7 +161,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
             too_close = np.array(np.where(d[b] < 6))[0]
             if too_close.shape[0] > 0:
                 cluster_center = np.mean(total_data[too_close,:2],axis = 0)
-                acc_vec[b] -= 2.5*((cluster_center - total_data[b][:2])/
+                acc_vec[b] -= b_motivation[0]*((cluster_center - total_data[b][:2])/
                                  np.linalg.norm((cluster_center - total_data[b][:2])+.0001))
 
             #avoid predators
@@ -161,7 +169,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
             too_close = too_close[too_close >= n_boids]
             if too_close.shape[0] > 0:
                 cluster_center = np.mean(total_data[too_close,:2],axis = 0)
-                acc_vec[b] -= 3*(cluster_center - total_data[b][:2])/np.linalg.norm((cluster_center - total_data[b][:2])+.0001)
+                acc_vec[b] -= b_motivation[1]*(cluster_center - total_data[b][:2])/np.linalg.norm((cluster_center - total_data[b][:2])+.0001)
 
 
             #conformity and cohesion
@@ -170,9 +178,9 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
             if cluster_inds.shape[0] > 0:
                 cluster_dir = np.mean(total_data[cluster_inds,2:],axis = 0)
                 cluster_dir = cluster_dir / np.linalg.norm(cluster_dir)
-                acc_vec[b] += 2*cluster_dir #conformity
+                acc_vec[b] += b_motivation[2]*cluster_dir #conformity
                 cluster_spot = np.mean(total_data[cluster_inds,:2],axis =0)
-                acc_vec[b] += ((cluster_spot - total_data[b][:2])/
+                acc_vec[b] += b_motivation[3]*((cluster_spot - total_data[b][:2])/
                         np.linalg.norm((cluster_spot - total_data[b][:2]))) #cohesion
 
         #calculate predator motion
@@ -194,7 +202,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
             cluster_ds = total_data[b] - total_data[cluster_inds]
             if cluster_inds.shape[0] > 0:
                 cluster_inds = np.mean(total_data[cluster_inds,:2],axis = 0)
-                acc_vec[b+n_boids] += 2*((cluster_inds - total_data[b+n_boids][:2])/(
+                acc_vec[b+n_boids] += p_motivation[1]*((cluster_inds - total_data[b+n_boids][:2])/(
                         np.linalg.norm((cluster_inds - total_data[b+n_boids][:2]))+.0001))
             
             if pred_swarm:
@@ -203,7 +211,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
                 too_close = too_close[too_close >= n_boids]
                 if too_close.shape[0] > 0:
                     cluster_center = np.mean(total_data[too_close,:2],axis = 0)
-                    acc_vec[b+n_boids] -= 3*((cluster_center - total_data[b+n_boids][:2])/
+                    acc_vec[b+n_boids] -= p_motivation[0]*((cluster_center - total_data[b+n_boids][:2])/
                             np.linalg.norm((cluster_center - total_data[b+n_boids][:2])+.0001))
 
                 #cohesion and conformity
@@ -213,9 +221,9 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
                 if cluster_inds.shape[0] > 0:
                     cluster_dir = np.mean(total_data[cluster_inds,2:],axis = 0)
                     cluster_dir = cluster_dir / np.linalg.norm(cluster_dir)
-                    acc_vec[b+n_boids] += 3*cluster_dir 
+                    acc_vec[b+n_boids] += p_motivation[2]*cluster_dir 
                     cluster_spot = np.mean(total_data[cluster_inds,:2],axis =0)
-                    acc_vec[b+n_boids] += 1*((cluster_spot - total_data[b+n_boids][:2])/
+                    acc_vec[b+n_boids] += p_motivation[3]*((cluster_spot - total_data[b+n_boids][:2])/
                             np.linalg.norm((cluster_spot - total_data[b+n_boids][:2]))) #cohesion
 
 
@@ -227,6 +235,7 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
             x_hist_2[k,i], y_hist_2[k,i] = b.get_loc()[:2]
     
     if anim:
+        print("Animating...")
         fig,ax = plt.subplots(1,figsize = (10,10))
 
         def update(i):
@@ -241,9 +250,9 @@ def hunt(n_boids = 1000, n_preds = 5,time_steps = 150,
         animation.writer = animation.writers['ffmpeg']
         plt.ioff()  #turn off interaction to save file
 
-        ani = animation.FuncAnimation(fig, update, frames = range(time_steps),interval = 60) #run the animation
+        ani = animation.FuncAnimation(fig, update, frames = range(time_steps),interval = 30) #run the animation
 
-        ani.save(f'wide_{n_preds}hunters_{n_boids_orig}boids_flock{pred_swarm}.gif')
+        ani.save(f'{n_preds}hunters_{n_boids_orig}boids_flock{pred_swarm}time_s{time_steps}{anim_type}')
     return dead_count
 
     
