@@ -1,6 +1,5 @@
-# Predator-Prey Swarm Simulator and Animator
+# Predator-Prey Swarm Simulator
 ![alt text](https://github.com/DanielMortenson/PredatoryBoids/blob/e294c3088206077f0b131e7c302dd62758c8104a/hunt2.gif?raw=true)
-
 ## Abstract
 
 Boid's Algorithm (Reynolds 1987) is the classical method for modeling the movement of animals in flocks or swarms. In it, each each bird-oid (boid) actor makes choices about how to move based on the movement of surrounding boids. In this report, I show that Boid's Algorithm can be extended to describe short-term predator-prey dynamics, where one or both of the groups (predator and prey) behave as flocks or swarms. Swarm-predator, swarm-prey behavior is most notably seen in sharks and schools of fish (shoiks and foish) and flocks of birds and flocks of insects. The benefits of flock vs lone hunting are also analyzed here.
